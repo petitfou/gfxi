@@ -1,0 +1,38 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install packages build
+        run: |
+          sudo apt update
+          sudo apt install -y devscripts equivs dput
+
+      # - name: Import GPG key
+      #   id: import_gpg
+      #   uses: crazy-max/ghaction-import-gpg@v5
+      #   with:
+      #     gpg_private_key: ${{ secrets.CANONICAL }}
+      #     passphrase: ${{ secrets.CANONICAL_PASSPHRASE }}
+
+      - name: Build package
+        run: |
+          PKG_VER=$(dpkg-parsechangelog | sed -n 's/^Version: //p')
+          git archive --format=tar.gz -o gfxi_1.3.orig.tar.gz main
+          mv gfxi_1.3.orig.tar.gz ../
+          sudo mk-build-deps -i -r
+          sudo rm -f gfxi-build-deps*
+          debuild -S -us -uc
+          cd ../
+          # debsign -khector.cao@canonical.com cpu-energy-meter_${PKG_VER}_source.changes
+          # dput -f ppa:kivuteam/ppa gfxi_${PKG_VER}_source.changes
+

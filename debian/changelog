@@ -1,3 +1,9 @@
+gfxi (1.3-2) jammy; urgency=medium
+
+  * Fix delivery process
+
+ -- Hector CAO <hector.cao@canonical.com>  Fri, 31 Mar 2023 15:55:51 +0200
+
 gfxi (1.3-1) jammy; urgency=medium
 
   * Add install and uninstall targets to Makefile.

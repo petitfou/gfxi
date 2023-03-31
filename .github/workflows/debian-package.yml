@@ -4,13 +4,18 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'v*.*-ubuntu-*'
+      - 'v*.*-*ubuntu-*'
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
+        id: extract_branch
 
       - name: install packages build
         run: |
@@ -29,7 +34,7 @@ jobs:
           PKG_VER=$(dpkg-parsechangelog | sed -n 's/^Version: //p')
           VERS_ARRAY=(${PKG_VER//-/ })
           PKG_ORIG_VER=${VERS_ARRAY[0]}
-          git archive --format=tar.gz -o gfxi_${PKG_ORIG_VER}.orig.tar.gz HEAD
+          git archive --format=tar.gz -o gfxi_${PKG_ORIG_VER}.orig.tar.gz ${{ steps.extract_branch.outputs.branch }}
           mv gfxi_${PKG_ORIG_VER}.orig.tar.gz ../
           sudo mk-build-deps -i -r
           sudo rm -f gfxi-build-deps*
